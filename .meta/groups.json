@@ -1,4 +1,6 @@
 {
-  "groups": [],
+  "groups": [
+    "Vercel Smoke Test"
+  ],
   "assignments": {}
 }
