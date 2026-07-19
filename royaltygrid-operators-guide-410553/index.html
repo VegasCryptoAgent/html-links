@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>RoyaltyGrid — Operators Guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+  /* ---------- tokens (exact Touchbase guide system) ---------- */
+  :root{
+    --bg:#14110f; --bg2:#1b1611; --panel:#211a15; --line:#392f26;
+    --text:#f5eee5; --muted:#ab9d8d; --faint:#786a58;
+    --amber:#ffb545; --amber-soft:#4a3520; --coral:#ff6b7f; --green:#4bd897; --red:#ff6b6b;
+    --font-display:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+    --font-body:ui-serif,"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;
+    --font-mono:ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;
+    --r:14px; --r-sm:8px;
+  }
+  :root[data-theme="light"]{
+    --bg:#faf5ee; --bg2:#ffffff; --panel:#f3ead9; --line:#e3d5c0;
+    --text:#241c14; --muted:#6e5f4c; --faint:#9c8b76;
+    --amber:#b8690a; --amber-soft:#e2c9a4; --coral:#c93c53; --green:#1d8f63; --red:#c73b34;
+  }
+  :root[data-theme="dark"]{
+    --bg:#14110f; --bg2:#1b1611; --panel:#211a15; --line:#392f26;
+    --text:#f5eee5; --muted:#ab9d8d; --faint:#786a58;
+    --amber:#ffb545; --amber-soft:#4a3520; --coral:#ff6b7f; --green:#4bd897; --red:#ff6b6b;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--font-body); line-height:1.6; font-size:16.5px;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--amber); color:var(--bg)}
+  a{color:var(--amber); text-decoration-thickness:1px}
+  code, .mono{font-family:var(--font-mono); font-size:.88em}
+
+  h1,h2,h3{font-family:var(--font-display); text-wrap:balance; letter-spacing:-.01em; margin:0}
+  .eyebrow{
+    font-family:var(--font-display); text-transform:uppercase; letter-spacing:.14em;
+    font-size:11.5px; font-weight:700; color:var(--muted);
+  }
+
+  .page{max-width:1180px; margin:0 auto; padding:0 28px 100px}
+
+  .hero{
+    padding:76px 0 44px; border-bottom:1px solid var(--line);
+    display:flex; flex-direction:column; gap:18px;
+  }
+  .hero .eyebrow{color:var(--amber)}
+  .hero h1{font-size:clamp(40px,6.5vw,68px); font-weight:900; line-height:.98}
+  .hero .lede{
+    font-family:var(--font-body); font-size:20px; color:var(--muted); max-width:640px; line-height:1.55;
+  }
+  .hero .tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px}
+  .tag{
+    font-family:var(--font-display); font-size:11px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; padding:5px 11px; border-radius:99px; border:1px solid var(--line);
+    color:var(--muted); background:var(--panel);
+  }
+  .tag.live{color:var(--green); border-color:color-mix(in srgb, var(--green) 40%, var(--line))}
+
+  .layout{display:grid; grid-template-columns:200px 1fr; gap:56px; padding-top:44px}
+  @media (max-width:860px){ .layout{grid-template-columns:1fr} }
+
+  .toc{position:sticky; top:28px; align-self:start; display:flex; flex-direction:column; gap:2px}
+  @media (max-width:860px){
+    .toc{
+      position:static; flex-direction:row; overflow-x:auto; gap:8px; padding-bottom:10px;
+      border-bottom:1px solid var(--line); margin-bottom:8px;
+    }
+  }
+  .toc a{
+    font-family:var(--font-display); font-size:13px; font-weight:600; color:var(--muted);
+    text-decoration:none; padding:7px 10px; border-radius:var(--r-sm); white-space:nowrap;
+    border-left:2px solid transparent; transition:color .15s, background .15s;
+  }
+  @media (max-width:860px){ .toc a{border-left:none; border:1px solid var(--line)} }
+  .toc a:hover{color:var(--text); background:var(--panel)}
+  .toc a.active{color:var(--amber); border-left-color:var(--amber); background:var(--panel)}
+
+  main{min-width:0}
+  section{padding:52px 0; border-bottom:1px solid var(--line)}
+  section:last-child{border-bottom:none}
+  section > .eyebrow{display:block; margin-bottom:10px}
+  section h2{font-size:clamp(26px,3.4vw,34px); font-weight:800; margin-bottom:18px}
+  .prose{max-width:66ch; color:var(--text)}
+  .prose p{margin:0 0 16px}
+  .prose p:last-child{margin-bottom:0}
+  .prose .lead{font-size:18px; color:var(--muted)}
+
+  .flow{display:flex; flex-direction:column; gap:0; margin-top:8px}
+  .flow-step{
+    display:grid; grid-template-columns:44px 1fr; gap:20px; padding:20px 0;
+    border-top:1px solid var(--line);
+  }
+  .flow-step:first-child{border-top:none}
+  .flow-num{
+    font-family:var(--font-display); font-weight:900; font-size:15px; color:var(--amber);
+    width:34px; height:34px; border-radius:50%; border:1.5px solid var(--amber);
+    display:flex; align-items:center; justify-content:center; margin-top:2px;
+  }
+  .flow-step h3{font-size:17px; font-weight:700; margin-bottom:5px}
+  .flow-step p{margin:0; color:var(--muted); font-size:15px; max-width:58ch}
+
+  .fgrid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--r); overflow:hidden; margin-top:8px}
+  @media (max-width:640px){ .fgrid{grid-template-columns:1fr} }
+  .fcard{background:var(--bg2); padding:24px 26px}
+  .fcard .cat{
+    display:inline-flex; align-items:center; gap:6px; font-family:var(--font-display);
+    font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin-bottom:10px;
+  }
+  .fcard .cat::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor}
+  .cat.core{color:var(--amber)}
+  .cat.live{color:var(--green)}
+  .cat.auto{color:var(--coral)}
+  .cat.setup{color:var(--faint)}
+  .fcard h3{font-size:17.5px; font-weight:700; margin-bottom:8px}
+  .fcard p{margin:0; color:var(--muted); font-size:14.5px; line-height:1.55}
+  .fcard p + p{margin-top:8px}
+
+  .sources{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:10px}
+  @media (max-width:760px){ .sources{grid-template-columns:1fr} }
+  .source{padding:18px 20px; background:var(--panel); border:1px solid var(--line); border-radius:var(--r-sm)}
+  .source .src-name{font-family:var(--font-display); font-weight:700; font-size:14px; margin-bottom:6px; display:block}
+  .source p{margin:0; color:var(--muted); font-size:13.5px}
+  .honesty{
+    margin-top:20px; padding:16px 20px; border-radius:var(--r-sm);
+    background:color-mix(in srgb, var(--green) 8%, transparent);
+    border:1px solid color-mix(in srgb, var(--green) 30%, var(--line));
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .honesty .dot{width:8px; height:8px; border-radius:50%; background:var(--green); margin-top:7px; flex:none}
+  .honesty p{margin:0; font-size:14px; color:var(--text)}
+  .honesty b{color:var(--green)}
+
+  .checklist{display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--r); overflow:hidden; margin-top:10px}
+  .check-item{background:var(--bg2); padding:18px 22px; display:grid; grid-template-columns:26px 1fr; gap:16px; align-items:start}
+  .check-mark{
+    width:22px; height:22px; border-radius:50%; border:1.5px solid var(--amber); margin-top:2px;
+    display:flex; align-items:center; justify-content:center; color:var(--amber); font-size:12px; font-weight:900;
+  }
+  .check-item h3{font-size:15.5px; font-weight:700; margin-bottom:4px}
+  .check-item p{margin:0; color:var(--muted); font-size:14px}
+  .check-item .where{
+    display:inline-block; margin-top:8px; font-family:var(--font-mono); font-size:12px;
+    color:var(--amber); background:var(--amber-soft); padding:3px 8px; border-radius:5px;
+  }
+
+  footer{padding:44px 0 0; display:flex; flex-wrap:wrap; justify-content:space-between; gap:20px; align-items:center}
+  footer .fnote{font-size:13px; color:var(--faint); max-width:50ch}
+  footer .flinks{display:flex; gap:18px; font-family:var(--font-display); font-size:13px; font-weight:600}
+  footer .flinks a{color:var(--muted)}
+  footer .flinks a:hover{color:var(--amber)}
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important; scroll-behavior:auto !important} }
+
+  @media print{
+    body{background:var(--bg) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact}
+    .page{padding:0 0 40px}
+    .layout{grid-template-columns:1fr; gap:0; padding-top:24px}
+    .toc{
+      position:static; flex-direction:row; flex-wrap:wrap; gap:8px;
+      border-bottom:1px solid var(--line); padding-bottom:14px; margin-bottom:4px;
+    }
+    .toc a{border-left:none; border:1px solid var(--line); font-size:12px}
+    section{padding:36px 0}
+    .fgrid, .checklist, .flow, .sources, .honesty, .fcard, .check-item, .flow-step{break-inside:avoid}
+    a{text-decoration:none}
+  }
+  @page{ size: letter; margin: 0.55in 0.65in; }
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <span class="eyebrow">Guide</span>
+    <h1>RoyaltyGrid</h1>
+    <p class="lede">Operators guide for the live product: how to log in as owner, bring people into the workspace, and run royalties without spreadsheet chaos.</p>
+    <div class="tags">
+      <span class="tag live">Production · royaltygrid.com</span>
+      <span class="tag">Invite-only signup</span>
+      <span class="tag">Exact cents</span>
+      <span class="tag">Not a payment processor</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" id="toc">
+      <a href="#login">Owner login</a>
+      <a href="#access">Bring people in</a>
+      <a href="#roles">Roles</a>
+      <a href="#screens">What's inside</a>
+      <a href="#workflows">Workflows</a>
+      <a href="#security">Security</a>
+      <a href="#ops">Platform ops</a>
+      <a href="#troubleshoot">Troubleshoot</a>
+    </nav>
+
+    <main>
+
+      <!-- OWNER LOGIN — checklist pattern like Touchbase "Getting started" -->
+      <section id="login">
+        <span class="eyebrow">Owner login</span>
+        <h2>Log in and manage the workspace</h2>
+        <div class="prose">
+          <p class="lead">Production had zero organizations after the audit cleanup, so a bootstrap owner was created for the RoyaltyGrid workspace.</p>
+          <p>Use this account to sign in at <a href="https://royaltygrid.com">royaltygrid.com</a>. Change the password on first login and turn on MFA before you share anything else.</p>
+        </div>
+        <div class="checklist">
+          <div class="check-item">
+            <div class="check-mark">1</div>
+            <div>
+              <h3>Open production</h3>
+              <p>Go to the live product and sign in with the owner account below.</p>
+              <span class="where">https://royaltygrid.com</span>
+            </div>
+          </div>
+          <div class="check-item">
+            <div class="check-mark">2</div>
+            <div>
+              <h3>Email</h3>
+              <p>Owner account created for the bootstrap workspace.</p>
+              <span class="where">support@royaltygrid.com</span>
+            </div>
+          </div>
+          <div class="check-item">
+            <div class="check-mark">3</div>
+            <div>
+              <h3>Temp password</h3>
+              <p>Rotate this immediately after first login. Treat this guide as confidential until you do.</p>
+              <span class="where">RoyaltyGrid-Owner-f8821693</span>
+            </div>
+          </div>
+          <div class="check-item">
+            <div class="check-mark">4</div>
+            <div>
+              <h3>Lock it down</h3>
+              <p>Settings → change password → enable MFA for the owner. Then invite staff or copy the join link.</p>
+              <span class="where">Settings</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BRING PEOPLE IN — flow pattern -->
+      <section id="access">
+        <span class="eyebrow">Bring people in</span>
+        <h2>Invite-only. Two ways in.</h2>
+        <div class="prose">
+          <p class="lead">Production runs with <code>REGISTRATION_MODE=invite_only</code>. Nobody can self-register a new workspace unless an operator deliberately opens registration — which you should not do.</p>
+        </div>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-num">1</div>
+            <div>
+              <h3>Universal join link</h3>
+              <p>In-app path: <b>Team → Universal join link</b>. Copy the link and share it. Anyone with it creates an account and joins <b>this</b> workspace as the configured role (default <b>participant</b>). Rotate or disable the link if it leaks.</p>
+              <p style="margin-top:8px"><code>https://royaltygrid.com/?join=&lt;CODE&gt;</code></p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div>
+              <h3>Email invitations</h3>
+              <p>In-app path: <b>Team → Send invitation</b>. One-time link of the form <code>/?invite=&lt;token&gt;</code> for a <b>specific email</b>. Expires in <b>7 days</b>. Prefer this when you need a known address and a chosen staff role (admin, accountant, manager…).</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">3</div>
+            <div>
+              <h3>They land in the right place</h3>
+              <p>Staff see the full ops product for their role. Participants land in the rights portal — their earnings, splits, statements, and support only. Link their user to a <b>People</b> record so portal data binds correctly.</p>
+            </div>
+          </div>
+        </div>
+        <div class="honesty">
+          <span class="dot"></span>
+          <p><b>Production default:</b> invite-only. New workspaces cannot self-register. Users enter only via owner/staff invite or the universal join link.</p>
+        </div>
+      </section>
+
+      <!-- ROLES — sources grid pattern -->
+      <section id="roles">
+        <span class="eyebrow">Roles</span>
+        <h2>Who can see what</h2>
+        <div class="prose">
+          <p class="lead">Grant staff roles deliberately. Participants never see the full ledger.</p>
+        </div>
+        <div class="sources">
+          <div class="source">
+            <span class="src-name">Owner</span>
+            <p>Full control and ownership transfer. Everything in the workspace.</p>
+          </div>
+          <div class="source">
+            <span class="src-name">Admin</span>
+            <p>Team, settings, enterprise, ops — everything except owner-only transfer.</p>
+          </div>
+          <div class="source">
+            <span class="src-name">Accountant</span>
+            <p>Revenue, imports, royalty runs, statements, payables, plus staff reads.</p>
+          </div>
+          <div class="source">
+            <span class="src-name">Manager</span>
+            <p>Catalog, splits, people, connections, and staff reads.</p>
+          </div>
+          <div class="source">
+            <span class="src-name">Participant</span>
+            <p>Rights portal only — own earnings, splits, statements, support.</p>
+          </div>
+          <div class="source">
+            <span class="src-name">Viewer</span>
+            <p>Minimal portal access under the same isolation model.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREENS — fgrid like "What's inside" -->
+      <section id="screens">
+        <span class="eyebrow">What's inside</span>
+        <h2>Every major screen, one real job</h2>
+        <div class="fgrid">
+          <div class="fcard">
+            <span class="cat live">Daily</span>
+            <h3>Ledger</h3>
+            <p><b>What:</b> Live totals — gross revenue, publishing/master pools, balances by person, warnings, audit activity.</p>
+            <p><b>How:</b> Open after imports or revenue entry. Drill warnings into incomplete split sheets.</p>
+            <p><b>Why:</b> One screen answers who is owed what before period close.</p>
+          </div>
+          <div class="fcard">
+            <span class="cat core">Core</span>
+            <h3>Revenue</h3>
+            <p><b>What:</b> Source lines (manual or import) in exact cents.</p>
+            <p><b>How:</b> Enter or import CSV/XLSX/XLS; preview; commit; reverse mistakes instead of erasing history.</p>
+            <p><b>Why:</b> Allocations need immutable, provenance-tracked source rows.</p>
+          </div>
+          <div class="fcard">
+            <span class="cat core">Core</span>
+            <h3>Catalog &amp; People</h3>
+            <p><b>What:</b> Songs, releases, recordings, compositions; payees with roles, IPI, tax status.</p>
+            <p><b>How:</b> Lock splits only when master + publishing each sum to 100% and reviews (if any) are done.</p>
+            <p><b>Why:</b> Split versions are the law of allocation for each revenue date.</p>
+          </div>
+          <div class="fcard">
+            <span class="cat auto">Review</span>
+            <h3>Reviews</h3>
+            <p><b>What:</b> Participant approval of draft split sheets; disputes with evidence.</p>
+            <p><b>How:</b> Manager requests review → approve / request changes / dispute from Reviews or email.</p>
+            <p><b>Why:</b> Shared ownership without email chaos.</p>
+          </div>
+          <div class="fcard">
+            <span class="cat live">Insight</span>
+            <h3>Analytics</h3>
+            <p><b>What:</b> Trends, top songs/people/sources, YouTube when connected, outliers.</p>
+            <p><b>How:</b> Open after data lands; watch sync freshness.</p>
+            <p><b>Why:</b> Spot concentration risk and import anomalies early.</p>
+          </div>
+          <div class="fcard">
+            <span class="cat core">Core</span>
+            <h3>Contracts · Runs · Payables</h3>
+            <p><b>What:</b> Versioned deals, calculation runs with traces, payable export batches.</p>
+            <p><b>How:</b> Draft → activate → run period → inspect trace → approve → export CSV → pay offline → confirm paid.</p>
+            <p><b>Why:</b> Auditable contract math; payments stay outside the product.</p>
+          </div>
+          <div class="fcard">
+            <span class="cat core">Core</span>
+            <h3>Statements</h3>
+            <p><b>What:</b> Per-person allocation statements (JSON + PDF), schedules, email jobs.</p>
+            <p><b>How:</b> Deliver on demand or monthly/quarterly from the same allocation engine.</p>
+            <p><b>Why:</b> Formal evidence without spreadsheet mail merges.</p>
+          </div>
+          <div class="fcard">
+            <span class="cat live">Portal</span>
+            <h3>Rights portal</h3>
+            <p><b>What:</b> Participant home — own earnings, splits, contracts, statements, support.</p>
+            <p><b>How:</b> Participants land here by default; staff can preview the holder experience.</p>
+            <p><b>Why:</b> Transparency without exposing the whole label’s ledger.</p>
+          </div>
+          <div class="fcard">
+            <span class="cat setup">Ops</span>
+            <h3>Connections &amp; Operations</h3>
+            <p><b>What:</b> YouTube via PostProxy, SFTP/IMAP, job health, email delivery, audit feed.</p>
+            <p><b>How:</b> Admin attaches sources; Operations shows dead or delayed jobs.</p>
+            <p><b>Why:</b> Real provenance; catch stuck work before artists do.</p>
+          </div>
+          <div class="fcard">
+            <span class="cat setup">Setup</span>
+            <h3>Enterprise &amp; Settings</h3>
+            <p><b>What:</b> Private files, API keys (<code>rg_live_…</code>), webhooks, SSO/SCIM, IP allowlist, MFA, sessions.</p>
+            <p><b>How:</b> Configure only with real credentials — readiness never invents “connected.”</p>
+            <p><b>Why:</b> Label-grade controls without demo fiction.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- WORKFLOWS — flow + checklist like Touchbase -->
+      <section id="workflows">
+        <span class="eyebrow">Core workflows</span>
+        <h2>What to run every week</h2>
+
+        <div class="prose">
+          <p class="lead">Six paths operators actually use: invite, join, splits, import, period close, statements.</p>
+        </div>
+
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-num">A</div>
+            <div>
+              <h3>Invite a collaborator (email)</h3>
+              <p><b>Team → Send invitation</b> with email + role. They open <code>/?invite=…</code>, set a password, and land in the workspace. Optionally link them to a People record.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">B</div>
+            <div>
+              <h3>Share the universal join link</h3>
+              <p><b>Team → Universal join link → Copy</b>. Share <code>https://royaltygrid.com/?join=…</code>. Joiner picks name, email, password and joins as the configured role. Rotate if the link was posted too widely.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">C</div>
+            <div>
+              <h3>Split a song and lock it</h3>
+              <p><b>Catalog</b> → create song → master + publishing rows each = 100% → optional review → lock. Later unlocks create a new draft; historical revenue keeps the old version.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">D</div>
+            <div>
+              <h3>Import a distributor statement</h3>
+              <p><b>Revenue</b> → upload CSV/XLSX/XLS → preview mapping → commit → resolve unmatched → verify in Ledger and Analytics.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">E</div>
+            <div>
+              <h3>Period close</h3>
+              <p>Reconcile expected totals → close the period → run royalty calculations if on the contract engine → approve payables → export batch CSV → pay offline → confirm paid.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">F</div>
+            <div>
+              <h3>Deliver statements</h3>
+              <p><b>Statements</b> → person + period → PDF or email. Check <b>Operations</b> for job status and email events.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECURITY -->
+      <section id="security">
+        <span class="eyebrow">Security</span>
+        <h2>What operators must respect</h2>
+        <div class="checklist">
+          <div class="check-item">
+            <div class="check-mark">✓</div>
+            <div><h3>Owner password</h3><p>Change the temp password on first login. Enable MFA for owners and admins.</p><span class="where">Settings</span></div>
+          </div>
+          <div class="check-item">
+            <div class="check-mark">✓</div>
+            <div><h3>Role isolation</h3><p>Do not grant staff roles casually. Participants never see the full ledger.</p><span class="where">Team</span></div>
+          </div>
+          <div class="check-item">
+            <div class="check-mark">✓</div>
+            <div><h3>Join link</h3><p>Treat it like a password. Rotate after broad sharing.</p><span class="where">Team</span></div>
+          </div>
+          <div class="check-item">
+            <div class="check-mark">✓</div>
+            <div><h3>Sessions &amp; secrets</h3><p>Revoke lost devices. Payment details are encrypted — never paste them into tickets.</p><span class="where">Settings</span></div>
+          </div>
+          <div class="check-item">
+            <div class="check-mark">✓</div>
+            <div><h3>RLS</h3><p>Postgres FORCE RLS enforces org scope even if an API bug slips.</p><span class="where">Platform</span></div>
+          </div>
+        </div>
+        <div class="honesty">
+          <span class="dot"></span>
+          <p><b>Health check:</b> <code>GET https://royaltygrid.com/api/health</code> — expect <code>ok: true</code>, <code>registration_mode: "invite_only"</code>, and <code>dead: 0</code>.</p>
+        </div>
+      </section>
+
+      <!-- PLATFORM OPS -->
+      <section id="ops">
+        <span class="eyebrow">Platform ops</span>
+        <h2>Env vars and related runbooks</h2>
+        <div class="prose">
+          <p class="lead">For people shipping or diagnosing the live service — not day-to-day label ops.</p>
+        </div>
+        <div class="sources">
+          <div class="source">
+            <span class="src-name">DATABASE_URL</span>
+            <p>Postgres (Neon / Railway).</p>
+          </div>
+          <div class="source">
+            <span class="src-name">SESSION_SECRET</span>
+            <p>≥32 chars; also derives app encryption.</p>
+          </div>
+          <div class="source">
+            <span class="src-name">APP_URL</span>
+            <p><code>https://royaltygrid.com</code></p>
+          </div>
+          <div class="source">
+            <span class="src-name">REGISTRATION_MODE</span>
+            <p><code>invite_only</code> in production (or <code>open</code> only if you mean it).</p>
+          </div>
+          <div class="source">
+            <span class="src-name">RESEND_* / EMAIL_FROM</span>
+            <p>Transactional email delivery.</p>
+          </div>
+          <div class="source">
+            <span class="src-name">STORAGE_* · POSTPROXY_* · GIT_COMMIT_SHA</span>
+            <p>Private files, YouTube connector, deploy identity on <code>/api/health</code>.</p>
+          </div>
+        </div>
+        <div class="prose" style="margin-top:22px">
+          <p>Related runbooks in the repo: <code>docs/PRODUCTION.md</code>, <code>docs/RESTORE_DRILL.md</code>, <code>docs/INCIDENT_RESPONSE.md</code>.</p>
+          <p>RoyaltyGrid is <b>not</b> a payment processor, bank, tax advisor, or source of fabricated DSP data. Operators stay responsible for source accuracy, contracts, tax, and paying people offline.</p>
+        </div>
+      </section>
+
+      <!-- TROUBLESHOOT -->
+      <section id="troubleshoot">
+        <span class="eyebrow">Troubleshoot</span>
+        <h2>When something looks wrong</h2>
+        <div class="checklist">
+          <div class="check-item">
+            <div class="check-mark">?</div>
+            <div><h3>Can’t register</h3><p>Expected under invite-only. Use the owner invite or the universal join link.</p><span class="where">invite_only</span></div>
+          </div>
+          <div class="check-item">
+            <div class="check-mark">?</div>
+            <div><h3>Empty participant portal</h3><p>People record is not linked to their user account.</p><span class="where">People</span></div>
+          </div>
+          <div class="check-item">
+            <div class="check-mark">?</div>
+            <div><h3>Split won’t lock</h3><p>Master or publishing side ≠ 100%, or a review is still pending.</p><span class="where">Catalog · Reviews</span></div>
+          </div>
+          <div class="check-item">
+            <div class="check-mark">?</div>
+            <div><h3>Import stalls / email missing</h3><p>Operations → dead or failed jobs; requeue after fix. Confirm Resend domain for email.</p><span class="where">Operations</span></div>
+          </div>
+          <div class="check-item">
+            <div class="check-mark">?</div>
+            <div><h3>Join link 404</h3><p>Code was rotated or disabled in Team. Copy a fresh link.</p><span class="where">Team</span></div>
+          </div>
+        </div>
+        <div class="prose" style="margin-top:22px">
+          <p>Support: in-app portal threads · <a href="mailto:support@royaltygrid.com">support@royaltygrid.com</a> · legal pages at <code>/terms</code>, <code>/privacy</code>, <code>/dpa</code>.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    <p class="fnote">Confidential operator guide. Contains a temporary production credential — change it on first login. Source markdown lives at <code>docs/OPERATORS_GUIDE.md</code>.</p>
+    <div class="flinks">
+      <a href="https://royaltygrid.com" target="_blank" rel="noopener">Open RoyaltyGrid →</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  (function(){
+    var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+    var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+    if (!('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!entry.isIntersecting) return;
+        var idx = sections.indexOf(entry.target);
+        if (idx === -1) return;
+        links.forEach(function(l){ l.classList.remove('active'); });
+        links[idx].classList.add('active');
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function(s){ if (s) io.observe(s); });
+  })();
+</script>
+</body>
+</html>
